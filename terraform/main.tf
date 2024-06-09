@@ -10,6 +10,7 @@ provider "flux" {
       username = var.github_org
       password = var.github_token
     }
+    branch = "flux"
   }
 }
 
