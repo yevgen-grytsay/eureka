@@ -39,6 +39,7 @@ helm install eureka ./helm/app
 Коротка демонстрація того, як встановлюються клієнт і сервер за допомогою `Helm`.
 [![asciicast](https://asciinema.org/a/L7KTCs6b8YAa8TyxPWGwdP6TE.svg)](https://asciinema.org/a/L7KTCs6b8YAa8TyxPWGwdP6TE)
 
+Окремо встановлюється [моніторинговий стек](#monitoring)
 
 ## UI
 Отримати URL веб-інтерфейсів клієнта і сервера можна за допомогою наступних команд.
@@ -66,6 +67,48 @@ echo "http://${SERVER_IP}:8761"
 - [eureka-client](https://github.com/yevgen-grytsay/eureka/pkgs/container/eureka-client)
 - [eureka-server](https://github.com/yevgen-grytsay/eureka/pkgs/container/eureka-server)
 
+
+## Monitoring
+Моніторинговий стек включає в себе такі компоненти: `Fluent-bit`, `OpenTelemetry Collector`, `Loki` та `Grafana`. Збираються 1) тільки логи 2) тільки з сервера і клієнта Eureka. З інших подів логи не збираються. Метрики і трейси не збираються.
+
+Щоб встановити моніторинговий стек, виконайте команди:
+```sh
+cd ./terraform
+terraform apply
+```
+
+### Схема роботи моніторингового стеку
+```mermaid
+flowchart LR
+
+Fluent-bit -->|push| c-p3030
+
+
+
+collector -->|push logs| Loki-3100
+
+Grafana -..->|query logs| Loki-3100
+
+subgraph Loki
+    Loki-3100(:3100)
+end
+
+subgraph collector[Otel Collector]
+    c-p3030(:3030)
+end
+
+subgraph Legend
+    direction LR
+    start1[ ] --->|push| stop1[ ]
+    style start1 height:0px;
+    style stop1 height:0px;
+    start2[ ] -..->|pull| stop2[ ]
+    style start2 height:0px;
+    style stop2 height:0px; 
+end
+
+style Legend fill:none
+```
 
 ## Resources
 ### Spring
