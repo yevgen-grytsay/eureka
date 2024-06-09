@@ -1,0 +1,28 @@
+logLevel: warn # Allowed values are: off, error, warn, info, debug and trace.
+
+config:
+  inputs: |
+    [INPUT]
+        Name tail
+        Path /var/log/containers/eureka-client-*.log,/var/log/containers/eureka-server-*.log
+        # Parser cri
+        multiline.parser java
+        Tag eureka.*
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
+
+  outputs: |
+    [OUTPUT]
+        Name opentelemetry
+        Match eureka.*
+        Host collector
+        Port 3030
+        metrics_uri /v1/metrics
+        logs_uri /v1/logs
+        traces_uri /v1/traces
+        Log_response_payload True
+        tls off
+        tls.verify off
+        Retry_Limit False
+        add_label app fluent-bit
+        add_label color blue

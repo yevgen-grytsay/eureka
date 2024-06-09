@@ -1,0 +1,38 @@
+nameOverride: collector
+
+## https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-collector/UPGRADING.md#0880-to-0890
+image:
+  repository: "otel/opentelemetry-collector-contrib"
+
+mode: deployment
+
+config:
+  ## https://opentelemetry.io/docs/collector/configuration/#receivers
+  receivers:
+    otlp:
+      protocols:
+        http:
+          endpoint: ${env:MY_POD_IP}:3030
+
+  ## https://opentelemetry.io/docs/collector/configuration/#exporters
+  exporters:
+    debug:
+      verbosity: normal # detailed, normal, ...
+    loki:
+      endpoint: http://loki:3100/loki/api/v1/push
+
+  ## https://opentelemetry.io/docs/collector/configuration/#service
+  service:
+    pipelines:
+      logs:
+        receivers: [otlp]
+        processors: [batch]
+        exporters: [debug, loki]
+
+ports:
+  otlp-http:
+    enabled: true
+    containerPort: 3030
+    servicePort: 3030
+    hostPort: 3030
+    protocol: TCP
