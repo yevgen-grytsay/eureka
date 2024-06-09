@@ -1,0 +1,3 @@
+github_org        = "yevgen-grytsay"
+github_repository = "eureka"
+github_token      = "<GitHub PAT token>"
