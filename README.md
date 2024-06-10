@@ -110,6 +110,28 @@ end
 style Legend fill:none
 ```
 
+### Проблеми
+Чомусь Fluent-bit неправильно визначав ім'я поду, через що не міг отримати інформацію про нього, щоб включити цю інформацію в лог.
+
+У логах самого Fluent-bit (`logLevel: debug`), з'являлись такі повідомлення:
+```
+[2024/06/10 22:12:08] [debug] [input:tail:tail.0] inode=1069058, /var/log/containers/eureka-server-d5c5776b6-dh5x2_default_eureka-server-092be7f49771b95692095c84771282b9f106bfa9f6ce03e5ebf8491dcc6d4aa2.log, events: IN_MODIFY
+[2024/06/10 22:12:08] [debug] [filter:kubernetes:kubernetes.0] Send out request to API Server for pods information
+[2024/06/10 22:12:08] [debug] [http_client] not using http_proxy for header
+[2024/06/10 22:12:08] [debug] [http_client] server kubernetes.default.svc:443 will close connection #54
+[2024/06/10 22:12:08] [debug] [filter:kubernetes:kubernetes.0] Request (ns=default, pod=s.eureka-server-d5c5776b6-dh5x2) http_do=0, HTTP Status: 404
+[2024/06/10 22:12:08] [debug] [filter:kubernetes:kubernetes.0] HTTP response
+{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods \"s.eureka-server-d5c5776b6-dh5x2\" not found","reason":"NotFound","details":{"name":"s.eureka-server-d5c5776b6-dh5x2","kind":"pods"},"code":404}
+```
+
+Пофіксилося явним вказанням потрібного парсера, який вже включений до стандартної конфігурації Fluent-bit. Йдеться про парсер [kube-custom](https://github.com/fluent/fluent-bit/blob/master/conf/parsers.conf#L127):
+```
+[PARSER]
+    Name    kube-custom
+    Format  regex
+    Regex   (?<tag>[^.]+)?\.?(?<pod_name>[a-z0-9](?:[-a-z0-9]*[a-z0-9])?(?:\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)_(?<namespace_name>[^_]+)_(?<container_name>.+)-(?<docker_id>[a-z0-9]{64})\.log$
+```
+
 ## Resources
 ### Spring
 - [External Application Properties](https://docs.spring.io/spring-boot/reference/features/external-config.html#features.external-config.files)
