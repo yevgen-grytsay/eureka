@@ -18,6 +18,7 @@ resource "helm_release" "fluent" {
 }
 
 resource "helm_release" "opentelemetry_collector" {
+  count = 0
   name  = "collector"
   chart = "https://github.com/open-telemetry/opentelemetry-helm-charts/releases/download/opentelemetry-collector-0.90.1/opentelemetry-collector-0.90.1.tgz"
 
