@@ -1,4 +1,4 @@
-logLevel: debug # Allowed values are: off, error, warn, info, debug and trace.
+logLevel: warn # Allowed values are: off, error, warn, info, debug and trace.
 
 config:
   inputs: |
@@ -22,9 +22,9 @@ config:
         Merge_Log           On
         Merge_Log_Key       original_log
         Keep_Log            Off
-        Labels On
-        Annotations On
-        Regex_Parser kube-custom
+        Labels              On
+        Annotations         On
+        Regex_Parser        kube-custom
 
   outputs: |
     [OUTPUT]
