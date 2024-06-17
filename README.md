@@ -2,19 +2,47 @@
 
 ## Kubernetes
 
-Для простоти в цій демонстрації я використовую `microk8s` із встановленими аддонами `dns` та `metallb`.
+Для простоти в цій демонстрації я використовую `microk8s` із встановленими аддонами `dns`, `metallb` та `nfs`.
+
+- `dns` - потрібен, щоб сервіси, які ми будемо створювати, були доступними в Kubernetes за доменним іменем;
+- `metallb` - потрібен, щоб зробити сервіс доступним іззовні (я не налаштовував ingress, бо ще не розібрався із ним);
+- `nfs` - для того, щоб поди могли просити у Kebernetes створити для них volume. У нашому випадку, volume потребує `Loki`.
 
 Сервер `microk8s` можна встановити на ОС `Ubuntu` за допомогою наступної команди.
 ```sh
 sudo snap install microk8s --classic --channel=1.30/stable
 ```
 
-Щоб встановити аддони, які використовуються в цій демонстрації, виконайте наступні команди:
+Щоб встановити аддони `dns` і `metallb`, які використовуються в цій демонстрації, виконаємо наступні команди:
 ```sh
-microk8s enable metallb:192.168.1.201-192.168.1.254
+microk8s enable metallb:192.168.1.201-192.168.1.254 # діапазон ip не має перетинатися з діапазоном роутера
 
 microk8s enable dns
 ```
+
+### NFS Add-on
+Щоб встановити аддон `nfs`, виконаємо на ноді наступні команди згідно [документації](https://microk8s.io/docs/addon-nfs):
+```sh
+sudo apt install -y nfs-common
+microk8s enable community
+microk8s enable nfs -n nuc-1 # "nuc-1" - це назва ноди, на якій ми хочемо увімкнути аддон nfs
+```
+
+Щоб виділення волюмів працювало правильно, треба зробити ще одну маніпуляцію. Коли ми встановили аддон `nfs`,
+він додав до ресурсів Kubernetes новий Storage Class з назвою `nfs`:
+```sh
+$ microk8s kubectl get storageclass
+NAME   PROVISIONER                            RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+nfs    cluster.local/nfs-server-provisioner   Delete          Immediate           true                   19m
+```
+
+Але цей Storage Class не є дефолтним. Тому щоб створити волюм за допомогою PVC, треба або у PVC явно вказувати назву Storage Class - `nfs`,
+або зробити цей Storage Class дефолтним. Зробимо друге:
+```sh
+microk8s kubectl patch storageclass nfs \
+	-p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+
 
 
 ## Configuration
