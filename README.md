@@ -111,9 +111,9 @@ style Legend fill:none
 ```
 
 ### Проблеми
-Чомусь Fluent-bit неправильно визначав ім'я поду, через що не міг отримати інформацію про нього, щоб включити цю інформацію в лог.
+Чомусь Fluent-bit неправильно визначав імена подів, через що не міг отримати інформацію про поди, щоб включити цю інформацію в лог.
 
-У логах самого Fluent-bit (`logLevel: debug`), з'являлись такі повідомлення:
+У логах самого Fluent-bit (при `logLevel: debug`) з'являлись такі повідомлення:
 ```
 [2024/06/10 22:12:08] [debug] [input:tail:tail.0] inode=1069058, /var/log/containers/eureka-server-d5c5776b6-dh5x2_default_eureka-server-092be7f49771b95692095c84771282b9f106bfa9f6ce03e5ebf8491dcc6d4aa2.log, events: IN_MODIFY
 [2024/06/10 22:12:08] [debug] [filter:kubernetes:kubernetes.0] Send out request to API Server for pods information
@@ -131,6 +131,8 @@ style Legend fill:none
     Format  regex
     Regex   (?<tag>[^.]+)?\.?(?<pod_name>[a-z0-9](?:[-a-z0-9]*[a-z0-9])?(?:\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)_(?<namespace_name>[^_]+)_(?<container_name>.+)-(?<docker_id>[a-z0-9]{64})\.log$
 ```
+
+[Directly accessing the REST API](https://kubernetes.io/docs/tasks/run-application/access-api-from-pod/#directly-accessing-the-rest-api)
 
 ## Resources
 ### Spring
